@@ -526,9 +526,10 @@
 
                     o.createButton.disabled = true;
                     o.passiveCreateButton.disabled = true;
+
+                    o.notAllowed = false;
+                    o.confirmButton.disabled = false;
                 }).then(() => o.rtc.dataChannel.send(btoa(JSON.stringify({ type: o.rtc.SYNCHRONIZE_HANDLE, notAllowed: !o.notAllowed }))));
-                o.notAllowed = false;
-                o.confirmButton.disabled = false;
             });
             o.reCreateButton = document.querySelector("#recreate");
             o.reCreateButton.addEventListener("click", () => {
@@ -548,27 +549,26 @@
                 o.connectionMessage3.disabled = true;
 
                 o.rtc.clear();
-                createDataChannel()
-                    .then(() => synchronizeChessBoard())
-                    .then(() => {
-                        o.tip1.style.display = "none";
-                        o.connectionMessage1.style.display = "none";
-                        o.connectionMessage1.disabled = true;
-                        o.tip2.style.display = "none";
-                        o.connectionMessage2.style.display = "none";
-                        o.connectionMessage2.disabled = true;
-                        o.confirmMessageButton.style.display = "none";
-                        o.confirmMessageButton.disabled = true;
-                        o.tip3.style.display = "none";
-                        o.connectionMessage3.style.display = "none";
-                        o.connectionMessage3.disabled = true;
+                createDataChannel().then(() => synchronizeChessBoard()).then(() => {
+                    o.tip1.style.display = "none";
+                    o.connectionMessage1.style.display = "none";
+                    o.connectionMessage1.disabled = true;
+                    o.tip2.style.display = "none";
+                    o.connectionMessage2.style.display = "none";
+                    o.connectionMessage2.disabled = true;
+                    o.confirmMessageButton.style.display = "none";
+                    o.confirmMessageButton.disabled = true;
+                    o.tip3.style.display = "none";
+                    o.connectionMessage3.style.display = "none";
+                    o.connectionMessage3.disabled = true;
 
-                        o.createButton.disabled = true;
-                        o.passiveCreateButton.disabled = true;
-                    })
-                    .then(() => o.rtc.dataChannel.send(btoa(JSON.stringify({ type: o.rtc.SYNCHRONIZE_HANDLE, notAllowed: !o.notAllowed }))));
-                o.notAllowed = state;
-                o.confirmButton.disabled = state;
+                    o.createButton.disabled = true;
+                    o.passiveCreateButton.disabled = true;
+
+                    o.notAllowed = state;
+                    o.confirmButton.disabled = state;
+                }).then(() => o.rtc.dataChannel.send(btoa(JSON.stringify({ type: o.rtc.SYNCHRONIZE_HANDLE, notAllowed: !o.notAllowed }))));
+
             });
             o.passiveCreateButton = document.querySelector("#passive-create");
             o.passiveCreateButton.addEventListener("click", () => {
