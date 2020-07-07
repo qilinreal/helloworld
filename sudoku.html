@@ -306,14 +306,14 @@
                 SYNCHRONIZE_CHESSBOARD_SUCCESS: "synchronizeChessBoardSuccess",
                 ROUND_FINISHED: "roundFinished",
                 INTERVAL_MESSAGE: "intervalMessage",
-                serverConfig: {
-                    "iceServers": [
-                        {
-                            "urls": ["stun:stun1.l.google.com:19302"],
-                            "username": "webrtc",
-                            "credential": "webrtc"
-                        }
-                    ]
+                connectionConfig: {
+                    iceServers: [{
+                        urls: ["stun:stun1.l.google.com:19302"]
+                    }, {
+                        urls: 'turn:192.158.29.39:3478?transport=tcp',
+                        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                        username: '28224511:1379330808'
+                    }]
                 },
                 passive: false,
                 promise: {},
@@ -635,7 +635,7 @@
         }
 
         function createDataChannel() {
-            let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.serverConfig);
+            let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.connectionConfig);
             o.rtc.icecandidates = [];
             connection.onicecandidate = e => {
                 if (!e.candidate) { return; }
@@ -689,7 +689,7 @@
             return new Promise(e => o.rtc.promise.synchronizeChessBoardSuccess = e);
         }
         function waitForCDC() {
-            let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.serverConfig);
+            let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.connectionConfig);
             connection.onicecandidate = e => {
                 if (!e.candidate) { return; }
                 o.rtc.icecandidates.push(e.candidate.toJSON());
