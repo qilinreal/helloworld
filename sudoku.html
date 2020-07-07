@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sudoku v1.02</title>
+    <title>sudoku v1.03</title>
     <style>
         @media screen and (min-width: 1444px) {
             #sudoku {
@@ -636,6 +636,11 @@
 
         function createDataChannel() {
             let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.connectionConfig);
+            connection.onicegatheringstatechange = () => {
+                if (connection.iceGatheringState === "complete") {
+                    o.rtc.promise.hostGatheringComplete();
+                }
+            };
             o.rtc.icecandidates = [];
             connection.onicecandidate = e => {
                 if (!e.candidate) { return; }
@@ -663,14 +668,17 @@
                     o.confirmButton.disabled = false;
                     o.notAllowed = false;
                 } else if (data.type === o.rtc.INTERVAL_MESSAGE) {
-                    o.showDelay.innerHTML = `${Date.now() - data.timestamp}ms`;
+                    o.showDelay.innerHTML = `${Math.abs(Date.now() - data.timestamp)}ms`;
                 }
             };
             dataChannel.onclose = () => { console.log("dataChannel closed.") }
 
             connection.createOffer().then(s => {
-                return connection.setLocalDescription(s);
+                connection.setLocalDescription(s);
+                o.connectionMessage1.value = "连接中...";
+                return new Promise(r => o.rtc.promise.hostGatheringComplete = r);
             }).then(() => o.rtc.localDescription = o.rtc.connection.localDescription.toJSON()).then(() => {
+                o.connectionMessage1.value = "";
                 setTimeout(() => {
                     let json = JSON.stringify({ localDescription: o.rtc.connection.localDescription.toJSON(), icecandidates: o.rtc.icecandidates });
                     let encryptJSON = btoa(encodeURIComponent(json));
@@ -689,6 +697,11 @@
         }
         function waitForCDC() {
             let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.connectionConfig);
+            connection.onicegatheringstatechange = () => {
+                if (connection.iceGatheringState === "complete") {
+                    o.rtc.promise.passiveGatheringComplete();
+                }
+            };
             connection.onicecandidate = e => {
                 if (!e.candidate) { return; }
                 o.rtc.icecandidates.push(e.candidate.toJSON());
@@ -753,8 +766,11 @@
                     .then(() => { json.icecandidates.forEach(e => o.rtc.connection.addIceCandidate(e)) })
                     .then(() => o.rtc.connection.createAnswer())
                     .then(s => {
-                        return o.rtc.connection.setLocalDescription(s)
-                    }).then(()=>o.rtc.localDescription=o.rtc.connection.localDescription.toJSON()).then(() => {
+                        o.rtc.connection.setLocalDescription(s);
+                        o.connectionMessage3.value = "连接中...";
+                        return new Promise(r => o.rtc.promise.passiveGatheringComplete = r);
+                    }).then(() => o.rtc.localDescription = o.rtc.connection.localDescription.toJSON()).then(() => {
+                        o.connectionMessage3.value = "";
                         setTimeout(() => {
                             let json = JSON.stringify({ localDescription: o.rtc.connection.localDescription.toJSON(), icecandidates: o.rtc.icecandidates });
                             let encryptJSON = btoa(encodeURIComponent(json));
