@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sudoku v1.01</title>
+    <title>sudoku v1.02</title>
     <style>
         @media screen and (min-width: 1444px) {
             #sudoku {
@@ -669,9 +669,8 @@
             dataChannel.onclose = () => { console.log("dataChannel closed.") }
 
             connection.createOffer().then(s => {
-                o.rtc.localDescription = s;
                 return connection.setLocalDescription(s);
-            }).then(() => {
+            }).then(() => o.rtc.localDescription = o.rtc.connection.localDescription.toJSON()).then(() => {
                 setTimeout(() => {
                     let json = JSON.stringify({ localDescription: o.rtc.connection.localDescription.toJSON(), icecandidates: o.rtc.icecandidates });
                     let encryptJSON = btoa(encodeURIComponent(json));
@@ -754,9 +753,8 @@
                     .then(() => { json.icecandidates.forEach(e => o.rtc.connection.addIceCandidate(e)) })
                     .then(() => o.rtc.connection.createAnswer())
                     .then(s => {
-                        o.rtc.localDescription = s;
                         return o.rtc.connection.setLocalDescription(s)
-                    }).then(() => {
+                    }).then(()=>o.rtc.localDescription=o.rtc.connection.localDescription.toJSON()).then(() => {
                         setTimeout(() => {
                             let json = JSON.stringify({ localDescription: o.rtc.connection.localDescription.toJSON(), icecandidates: o.rtc.icecandidates });
                             let encryptJSON = btoa(encodeURIComponent(json));
