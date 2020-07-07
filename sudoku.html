@@ -306,6 +306,15 @@
                 SYNCHRONIZE_CHESSBOARD_SUCCESS: "synchronizeChessBoardSuccess",
                 ROUND_FINISHED: "roundFinished",
                 INTERVAL_MESSAGE: "intervalMessage",
+                serverConfig: {
+                    "iceServers": [
+                        {
+                            "urls": ["stun:stun1.l.google.com:19302"],
+                            "username": "webrtc",
+                            "credential": "webrtc"
+                        }
+                    ]
+                },
                 passive: false,
                 promise: {},
                 clear() {
@@ -319,6 +328,7 @@
                     this.passive = false;
                 },
                 clearPromise() {
+                    this.promise = {};
                 }
             }
         };
@@ -625,7 +635,7 @@
         }
 
         function createDataChannel() {
-            let connection = o.rtc.connection = new RTCPeerConnection();
+            let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.serverConfig);
             o.rtc.icecandidates = [];
             connection.onicecandidate = e => {
                 if (!e.candidate) { return; }
@@ -679,7 +689,7 @@
             return new Promise(e => o.rtc.promise.synchronizeChessBoardSuccess = e);
         }
         function waitForCDC() {
-            let connection = o.rtc.connection = new RTCPeerConnection();
+            let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.serverConfig);
             connection.onicecandidate = e => {
                 if (!e.candidate) { return; }
                 o.rtc.icecandidates.push(e.candidate.toJSON());
