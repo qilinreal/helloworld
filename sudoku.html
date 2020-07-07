@@ -478,7 +478,7 @@
                 o.editedCell = undefined;
 
                 o.notAllowed = true;
-                o.rtc.dataChannel.send(btoa(JSON.stringify({ type: o.rtc.ROUND_FINISHED, id: id, value: value })));
+                o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.ROUND_FINISHED, id: id, value: value }))));
             });
             o.tip1 = document.querySelector("#tip-1");
             o.tip2 = document.querySelector("#tip-2");
@@ -529,7 +529,7 @@
 
                     o.notAllowed = false;
                     o.confirmButton.disabled = false;
-                }).then(() => o.rtc.dataChannel.send(btoa(JSON.stringify({ type: o.rtc.SYNCHRONIZE_HANDLE, notAllowed: !o.notAllowed }))));
+                }).then(() => o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.SYNCHRONIZE_HANDLE, notAllowed: !o.notAllowed })))));
             });
             o.reCreateButton = document.querySelector("#recreate");
             o.reCreateButton.addEventListener("click", () => {
@@ -567,7 +567,7 @@
 
                     o.notAllowed = state;
                     o.confirmButton.disabled = state;
-                }).then(() => o.rtc.dataChannel.send(btoa(JSON.stringify({ type: o.rtc.SYNCHRONIZE_HANDLE, notAllowed: !o.notAllowed }))));
+                }).then(() => o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.SYNCHRONIZE_HANDLE, notAllowed: !o.notAllowed })))));
 
             });
             o.passiveCreateButton = document.querySelector("#passive-create");
@@ -637,11 +637,11 @@
                 o.rtc.promise.createFinished && o.rtc.promise.createFinished();
 
                 setInterval(() => {
-                    dataChannel.send(btoa(JSON.stringify({ type: o.rtc.INTERVAL_MESSAGE, timestamp: Date.now() })));
+                    dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.INTERVAL_MESSAGE, timestamp: Date.now() }))));
                 }, 1000);
             }
             dataChannel.onmessage = e => {
-                let data = JSON.parse(atob(e.data));
+                let data = JSON.parse(decodeURIComponent(atob(e.data)));
                 if (data.type === o.rtc.SYNCHRONIZE_CHESSBOARD_SUCCESS) {
                     o.rtc.promise.synchronizeChessBoardSuccess();
                 } else if (data.type === o.rtc.ROUND_FINISHED) {
@@ -671,11 +671,11 @@
             return new Promise(resolve => o.rtc.promise.createFinished = resolve);
         }
         function synchronizeChessBoard() {
-            o.rtc.dataChannel.send(btoa(JSON.stringify({
+            o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({
                 type: o.rtc.SYNCHRONIZE_CHESSBOARD,
                 fill: { rows: o.fill.rows, columns: o.fill.columns, cells: o.fill.cells },
                 cells: o.cells.map(e => { return { value: e.value, locked: e.locked }; })
-            })));
+            }))));
             return new Promise(e => o.rtc.promise.synchronizeChessBoardSuccess = e);
         }
         function waitForCDC() {
@@ -690,11 +690,11 @@
                     console.log("dataChannel opened.");
 
                     setInterval(() => {
-                        dataChannel.send(btoa(JSON.stringify({ type: o.rtc.INTERVAL_MESSAGE, timestamp: Date.now() })));
+                        dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.INTERVAL_MESSAGE, timestamp: Date.now() }))));
                     }, 1000);
                 };
                 dataChannel.onmessage = e => {
-                    let data = JSON.parse(atob(e.data));
+                    let data = JSON.parse(decodeURIComponent(atob(e.data)));
                     if (data.type === o.rtc.SYNCHRONIZE_HANDLE) {
                         o.notAllowed = data.notAllowed;
                         o.confirmButton.disabled = o.notAllowed;
@@ -714,7 +714,7 @@
                             }
                         }
                         o.rtc.promise.passiveCreateFinished();
-                        o.rtc.dataChannel.send(btoa(JSON.stringify({ type: o.rtc.SYNCHRONIZE_CHESSBOARD_SUCCESS })));
+                        o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.SYNCHRONIZE_CHESSBOARD_SUCCESS }))));
                     } else if (data.type === o.rtc.ROUND_FINISHED) {
                         o.cells[data.id].value = data.value;
                         o.cells[data.id].e.innerHTML = data.value;
